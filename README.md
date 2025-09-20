@@ -8,10 +8,11 @@
 **Supported Environments:**
 
 ```csv
-GNU Linux
+GNU/Linux
 Docker
 Windows (requires manual deployment)
 MacOS (? - Untested)
+BSD (? - Untested, Docker?)
 ```
 
 **Deployment:**
