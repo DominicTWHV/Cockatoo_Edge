@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `configs` (
     `update_interval` INT DEFAULT 0, -- interval to pull in dataset updates in minutes. Use 0 to set the time automatically
 
     `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
+);
 
 CREATE TABLE IF NOT EXISTS `datasets` (
     `security_repository` VARCHAR PRIMARY KEY, -- github repository for security dataset, ex: DominicTWHV/CTI-DB-DUMP
@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS `datasets` (
     `remote_update_interval` INT DEFAULT 0, -- how often in minutes is this dataset updates by the remote peer (set automatically, do not manually edit)
     
     `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
+);

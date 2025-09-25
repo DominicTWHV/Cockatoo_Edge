@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `dataset_metadata` (
     `num_of_invite_entries` INT,
 
     `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
+);
 
 CREATE TABLE IF NOT EXISTS `url_cache` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT,
