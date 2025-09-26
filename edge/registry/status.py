@@ -1,6 +1,6 @@
 class BotStatus:
-    morning = "dawn's light ruffle cockatoo plumes"
-    noon = "sun's blaze spark cockatoo prance"
-    afternoon = "breeze tease cockatoo crest"
-    evening = "dusk hush cockatoo chatter"
-    night = "stars soothe cockatoo dreams"
+    morning = "dawn's light stir"
+    noon = "sun's blaze a spark"
+    afternoon = "a gentle breeze brush by"
+    evening = "dusk hush"
+    night = "stars blink"
