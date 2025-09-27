@@ -55,8 +55,6 @@ class CockatooEdge(commands.Bot): # main class
         #.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="a song"))
         #.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="a movie"))
 
-        #note: why the hell did discord change the way to set status? this stinks and isnt uniform
-
     @status_task.before_loop
     async def before_task(self) -> None:
         await self.wait_until_ready()
@@ -89,7 +87,7 @@ class CockatooEdge(commands.Bot): # main class
         await self.tree.sync()
         self.logger.info(f"Command tree has been synchronized.")
 
-    # cockatoo_logger functions -----------------------------------------------
+    # discord api hooks -----------------------------------------------
 
     # ==================================================================================================================
 
