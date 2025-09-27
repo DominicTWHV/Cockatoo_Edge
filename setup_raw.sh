@@ -21,8 +21,11 @@ echo "Installing required Python packages..."
 
 pip install -r requirements.txt
 
-echo "Copying example.env to .env..."
-
-cp example.env .env
+if [ ! -f ".env" ]; then
+    echo "Copying example.env to .env..."
+    cp example.env .env
+else
+    echo ".env file already exists. Skipping copy."
+fi
 #wait for env setup
 #python3.12 main.py
