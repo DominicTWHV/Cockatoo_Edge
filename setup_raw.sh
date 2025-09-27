@@ -27,5 +27,12 @@ if [ ! -f ".env" ]; then
 else
     echo ".env file already exists. Skipping copy."
 fi
+
+if [ ! -f "get-pip.py" ]; then
+    echo "get-pip.py not found, not removing."
+else
+    echo "Removing get-pip.py..."
+    rm get-pip.py
+fi
 #wait for env setup
 #python3.12 main.py
