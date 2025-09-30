@@ -36,3 +36,5 @@ else
 fi
 #wait for env setup
 #python3.12 main.py
+
+echo "Setup complete. You can now run the application using 'python3 main.py'."
