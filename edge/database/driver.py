@@ -11,7 +11,7 @@ from edge.registry.database import PrimaryDBConf, SecurityDBConf
 
 class DBInitManager:
     @staticmethod
-    async def init_db(db_type: Literal["primary", "security"], db_path: str = PrimaryDBConf.sqlite_db_path) -> None: #expandable support for multiple dbs
+    async def init_db(db_type: Literal["primary", "security_core", "security_generic"], db_path: str = PrimaryDBConf.sqlite_db_path) -> None: #expandable support for multiple dbs
 
         db_type = db_type.lower()
         backend = "SQLite (async)"
@@ -28,10 +28,11 @@ class DBInitManager:
         db_logger.info(f"Database initialized.  | Type: {db_type} | Backend: {backend}\n")
     
     @staticmethod
-    async def _init_sqlite(db_type: Literal["primary", "security"], db_path: str) -> None: # need to explicitly define security db path
+    async def _init_sqlite(db_type: Literal["primary", "security_core", "security_generic"], db_path: str) -> None: # need to explicitly define security db path
         config_map = {
             "primary": (PrimaryDBConf.sqlite_schema_path),
-            "security": (SecurityDBConf.sqlite_schema_path),
+            "security_core": (SecurityDBConf.sqlite_schema_path_core),
+            "security_generic": (SecurityDBConf.sqlite_schema_path_generic),
         }
         
         schema_path = config_map[db_type]
