@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from edge.registry.colors import EmbedColors
 
-class Owner:
+class Cog_Owner:
 
     @staticmethod
     async def load_command_module_success(module: str) -> discord.Embed:
@@ -81,4 +81,14 @@ class Owner:
         )
         embed.timestamp = datetime.now(timezone.utc)
 
+        return embed
+    
+class General:
+
+    @staticmethod
+    async def specify_subcommand() -> discord.Embed:
+        embed = discord.Embed(
+            description='Please specify a subcommand.',
+            color=EmbedColors.lavender,
+        )
         return embed
