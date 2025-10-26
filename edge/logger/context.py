@@ -54,4 +54,5 @@ def setup_logger(name, log_file, level=logging.INFO, name_color: bool = None, re
 cockatoo_logger = setup_logger("cockatoo.edge", "logs/cockatoo.log", logging.INFO) #exclusive for commands
 db_logger = setup_logger("cockatoo.database", "logs/database.log", logging.INFO, name_color=bcolors.blue) #exclusively for database
 scanner_logger = setup_logger("cockatoo.moderation", "logs/moderation.log", logging.INFO, name_color=bcolors.magenta)
-update_logger = setup_logger("cockatoo.updates", "logs/updates.log", logging.INFO, name_color=bcolors.cyan)
+update_logger = setup_logger("cockatoo.updates", "logs/updates.log", logging.INFO, name_color=bcolors.cyan) #logger for dataset updates/downloads
+networking_logger = setup_logger("cockatoo.networking", "logs/networking.log", logging.INFO, name_color=bcolors.white) #logger for networking operations
