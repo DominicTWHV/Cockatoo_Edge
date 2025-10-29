@@ -1,12 +1,21 @@
 import aiohttp
 
 from edge.registry.networking import SessionConfigs, UserAgents
+
 from edge.logger.context import networking_logger
 
 class SessionFactory:
 
-    @staticmethod
-    async def create_session() -> aiohttp.ClientSession:
+    _instance = None
+    #define a singleton class to prevent initialization in multiple places
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(SessionFactory, cls).__new__(cls)
+            cls._instance.session = None
+
+        return cls._instance
+
+    async def create_session(self) -> aiohttp.ClientSession:
         try:
             #configure timeouts
             timeout = aiohttp.ClientTimeout(
@@ -27,16 +36,23 @@ class SessionFactory:
             )
 
             networking_logger.info(f"Created aiohttp ClientSession object with {SessionConfigs.max_connections} connections.")
+            self.session = session
             return session
             
         except Exception as e:
             networking_logger.error(f"Failed to create aiohttp ClientSession: {str(e)}")
             raise
 
-    @staticmethod
-    async def close_session(session: aiohttp.ClientSession) -> None:
+    async def grab_session(self) -> aiohttp.ClientSession:
+        if self.session is None or self.session.closed:
+            networking_logger.warning("aiohttp ClientSession is not initialized or closed. Creating a new session.")
+            return await self.create_session()
+        
+        return self.session
+
+    async def close_session(self) -> None:
         try:
-            await session.close()
+            await self.session.close()
             networking_logger.info("Closed aiohttp ClientSession successfully.")
             
         except Exception as e:
