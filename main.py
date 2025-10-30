@@ -1,9 +1,9 @@
 import os
+import sys
 import platform
 
-# uncomment these imports if a specialized shutdown function is needed (see bottom of file)
-#import signal
-#import asyncio
+import signal
+import asyncio
 
 import discord
 from discord.ext import commands, tasks
@@ -210,24 +210,23 @@ class CockatooEdge(commands.Bot): # main class
 
 load_dotenv()
 
-#uncomment this section below if a specialized shutdown function is needed.
-"""
+
 # register signal handler for graceful shutdown on ctrl c
 def signal_handler(_sig, _frame):
     try:
         cockatoo_logger.info("Shutting down. Bye!")
         loop = asyncio.get_running_loop()
 
+        loop.create_task(SessionFactory().close_session()) #close aiohttp session
         loop.create_task(bot.close())
         loop.call_later(1, loop.stop)
 
     except Exception as e:
         cockatoo_logger.error(f"Error during shutdown procedure: {e}")
         sys.exit(1) #force exit if error occurs
-"""
 
 if __name__ == "__main__":
-    #signal.signal(signal.SIGINT, signal_handler) #uncomment for specialized shutdown function
+    signal.signal(signal.SIGINT, signal_handler)
 
     bot = CockatooEdge()
     bot.run(os.getenv("TOKEN"))
