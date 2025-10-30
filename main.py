@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 from edge.helper.DBFunctions import AutoDBMgr
 from edge.helper.fileRead import FileHandler
+from edge.helper.aiohttpSessionFactory import SessionFactory
 
 from edge.registry.colors import EmbedColors
 from edge.registry.version import Version
@@ -73,7 +74,9 @@ class CockatooEdge(commands.Bot): # main class
 
         self.logger.info("-------------------\n")
 
-        await AutoDBMgr.init_db() #initializes database instances, configured by core.registry.database
+        await AutoDBMgr.init_db() #initializes database instances, configured by edge.registry.database
+
+        await SessionFactory().create_session() #initialize aiohttp session for global use
 
         await self.load_cogs()
 
