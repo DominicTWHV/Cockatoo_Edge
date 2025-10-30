@@ -1,0 +1,51 @@
+name: build and push docker to ghcr
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cleanup-build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete old package versions
+        run: |
+          echo "Deleting old versions of cockatoo-edge (keeping latest 1)"
+
+          gh api \
+            --paginate \
+            -H "Accept: application/vnd.github+json" \
+            "/users/${{ github.repository_owner }}/packages/container/cockatoo-edge/versions" \
+            --jq '.[1:][] | .id' | while read -r version_id; do
+              echo "Deleting version ID: $version_id"
+              gh api \
+                --method DELETE \
+                -H "Accept: application/vnd.github+json" \
+                "/users/${{ github.repository_owner }}/packages/container/cockatoo-edge/versions/$version_id" || true
+            done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/cockatoo-edge:latest
+            ghcr.io/${{ github.repository_owner }}/cockatoo-edge:${{ github.sha }}
