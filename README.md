@@ -4,40 +4,9 @@
 > [!IMPORTANT]
 > Work in progress — NOT production ready.
 
+[![GHCR Docker Build](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/build-docker.yml/badge.svg?branch=main)](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/build-docker.yml)
+
 ---
-
-## Setup
-
-**Supported Environments:**
-
-Definitely works:
-
-* `GNU/Linux` - Tested on:
-```
-Ubuntu Server 22.04 (bare metal | Docker)
-Ubuntu Server 24.04 (Docker)
-Ubuntu Desktop 24.04 (bare metal | Docker)
-Debian 13 (bare metal | Docker)
-```
-
-* `Windows` - Tested on:
-```
-Windows 11 - 24H2 (bare metal)
-Windows 10 - 22H2 (bare metal)
-```
-
-* `Docker` - Tested on:
-```
-Docker version 28.3.3
-```
-
-Probably works (untested):
-
-* `BSD`
-* `MacOS`
-
-Does not work:
-`Unknown` 
 
 **Deployment:**
 
