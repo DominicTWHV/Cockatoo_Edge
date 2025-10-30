@@ -16,6 +16,13 @@ class SessionFactory:
         return cls._instance
 
     async def create_session(self) -> aiohttp.ClientSession:
+
+        if self.session is not None and not self.session.closed:
+            networking_logger.warning("aiohttp ClientSession is already initialized. Skipping creation.")
+            return
+        
+        networking_logger.info("Creating aiohttp ClientSession object...")
+
         try:
             #configure timeouts
             timeout = aiohttp.ClientTimeout(

@@ -3,7 +3,7 @@ import os
 import aiosqlite
 import aiofiles
 
-from typing import Literal, Optional, Any
+from typing import Literal, Any
 
 from edge.logger.context import db_logger
 
