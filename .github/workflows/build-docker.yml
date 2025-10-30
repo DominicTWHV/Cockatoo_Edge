@@ -49,5 +49,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ lowercase(github.repository_owner) }}/cockatoo-edge:latest
-            ghcr.io/${{ lowercase(github.repository_owner) }}/cockatoo-edge:${{ github.sha }}
+            ghcr.io/dominictwhv/cockatoo-edge:latest
+            ghcr.io/dominictwhv/cockatoo-edge:${{ github.sha }}
