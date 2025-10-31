@@ -4,12 +4,81 @@
 > [!IMPORTANT]
 > Work in progress — NOT production ready.
 
+[![CodeQL](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/github-code-scanning/codeql)
+
 ---
 
-**Deployment:**
+## Deployment:
+
+**Docker (Recommended):**
+
+Install dependencies:
 
 ```bash
-N/A
+sudo apt update
+sudo apt install docker.io screen -y
+
+sudo usermod aG docker $USER #optional, add current user to docker group
+exit #you need to start a new shell session for changes to take effect
+```
+
+Clone the repository
+
+```bash
+git clone https://github.com/DominicTWHV/Cockatoo_Edge.git
+cd Cockatoo_Edge
+```
+
+Edit the environment variables
+
+```bash
+cp example.env .env
+nano .env
+```
+
+Insert your Discord bot token into the `.env` file, then use `ctrl+o ctrl+x` to save and quit.
+
+Next, configure settings, they are located within Cockatoo_Edge/edge/registry with a `.py` suffix. This step is optional, default settings will work fine out of the box.
+
+Use the provided Docker build script to automate the build process
+
+```bash
+./setup_docker.sh -b -t -c
+```
+
+Run the bot in a screen session
+
+Optionally, put this line into a bash file and use crontab to automatically start the bot upon reboot.
+
+```bash
+screen -dmS cockatoo docker run cockatoo_edge:latest
+```
+
+**Bare Metal:**
+
+Clone the repository
+
+```bash
+git clone https://github.com/DominicTWHV/Cockatoo_Edge.git
+cd Cockatoo_Edge
+```
+
+We provide a streamlined bare metal deployment script
+
+```bash
+./setup_raw.sh
+```
+
+Next, edit your `.env` file to include the bot token
+
+```bash
+nano .env
+```
+
+Finally, use a screen session to run the bot:
+
+```bash
+screen -dmS cockatoo python3 main.py
 ```
 
 ---
