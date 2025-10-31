@@ -9,7 +9,7 @@ HOST=""
 TAG="cockatoo_edge:latest" #set default tag in case user didnt provide one
 
 validate_tag() {
-    if [[ ! "$1" =~ ^[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+$ ]] && [[ ! "$1" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+    if [[ ! "$1" =~ ^[a-zA-Z0-9._/-]+:[a-zA-Z0-9._-]+$ ]] && [[ ! "$1" =~ ^[a-zA-Z0-9._/-]+$ ]]; then
         echo "[🐋] Error: Invalid tag format '$1'. Use format: name[:tag]. Example: cockatoo_edge:latest"
         exit 1
     fi
