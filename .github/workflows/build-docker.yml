@@ -42,13 +42,13 @@ jobs:
           done
 
       - name: Make script executable
-        run: chmod +x build_docker.sh
+        run: chmod +x setup_docker.sh
 
       - name: Build & tag images (script)
         env:
           TAG: ghcr.io/dominictwhv/cockatoo-edge:latest
 
-        run: ./build_docker.sh -b -t "$TAG"
+        run: ./setup_docker.sh -b -t "$TAG"
 
       - name: Tag image with commit SHA
         run: |
