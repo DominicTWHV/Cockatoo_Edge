@@ -4,8 +4,6 @@
 > [!IMPORTANT]
 > Work in progress — NOT production ready.
 
-[![GHCR Docker Build](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/build-docker.yml/badge.svg?branch=main)](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/build-docker.yml)
-
 ---
 
 **Deployment:**
