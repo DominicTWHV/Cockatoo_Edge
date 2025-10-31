@@ -59,7 +59,6 @@ while [[ $# -gt 0 ]]; do
         -c|--clean)
             CLEAN_CONTAINER=true
             docker image prune -a #docker will ask for confirmation, no need to handle it here
-            exit 0
             ;;
         *)
             echo "[🐋] Unknown option $1"
