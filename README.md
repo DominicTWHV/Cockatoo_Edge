@@ -4,13 +4,76 @@
 > [!IMPORTANT]
 > Work in progress — NOT production ready.
 
-[![CodeQL](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/github-code-scanning/codeql)
-
+[![CodeQL](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/github-code-scanning/codeql) [![GHCR Build](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/build-docker.yml/badge.svg)](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/build-docker.yml)
 ---
 
-## Deployment:
+## Deployment Options:
+[GHCR Docker Image](#deployment---ghcr-image) 
+(GHCR is ONLY available for x86_64 architecture. Use [Local Build - Docker](#docker-recommended) for other architectures.)
 
-**Docker (Recommended):**
+[Local Build - Docker](#docker-recommended)
+[Local Build - Bare Metal](#bare-metal)
+
+## Deployment - GHCR Image:
+
+### Docker:
+
+We provide a `ghcr.io` image that automatically updates once there is a stable push on the `main` branch (currently only available for x86_64 arch).
+
+Install dependencies:
+
+```bash
+sudo apt update
+sudo apt install docker.io screen -y
+
+sudo usermod aG docker $USER #optional, add current user to docker group
+exit #you need to start a new shell session for changes to take effect
+```
+
+Pull the image
+
+```bash
+docker pull docker pull ghcr.io/dominictwhv/cockatoo-edge:latest
+```
+
+Environment setup
+
+```bash
+#create a standalone dir for this project
+mkdir -p cockatoo-edge
+cd cockatoo-edge
+
+#change the placeholder for your actual bot token. Do NOT fork this repository and commit this token into the .env file.
+echo 'TOKEN=<your token here>' >> .env
+```
+
+Running
+
+```bash
+screen -dmS cockatoo docker run --env-file .env ghcr.io/dominictwhv/cockatoo-edge
+```
+
+Updating the image
+
+Stop the container
+
+```bash
+screen -r cockatoo
+```
+
+Then press `ctrl + c` once and wait for the bot to terminate
+
+Pull the update from GHCR
+
+```bash
+docker pull docker pull ghcr.io/dominictwhv/cockatoo-edge:latest
+```
+
+And then restart the container.
+
+## Deployment - Local Build:
+
+### Docker (Recommended):
 
 Install dependencies:
 
@@ -54,7 +117,7 @@ Optionally, put this line into a bash file and use crontab to automatically star
 screen -dmS cockatoo docker run cockatoo_edge:latest
 ```
 
-**Bare Metal:**
+### Bare Metal:
 
 Clone the repository
 
