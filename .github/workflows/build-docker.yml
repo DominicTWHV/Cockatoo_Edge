@@ -1,0 +1,62 @@
+name: build and push docker to ghcr
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cleanup-build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete old package versions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OWNER_LOWER=dominictwhv
+          PACKAGE=cockatoo-edge
+
+          gh api --paginate \
+            -H "Accept: application/vnd.github+json" \
+            "/users/$OWNER_LOWER/packages/container/$PACKAGE/versions" \
+            --jq '.[1:][] | .id' |
+          while read -r vid; do
+            echo "Deleting version $vid"
+            gh api --method DELETE \
+              -H "Accept: application/vnd.github+json" \
+              "/users/$OWNER_LOWER/packages/container/$PACKAGE/versions/$vid" || true
+          done
+
+      - name: Make script executable
+        run: chmod +x setup_docker.sh
+
+      - name: Build & tag images (script)
+        env:
+          TAG: ghcr.io/dominictwhv/cockatoo-edge:latest
+
+        run: ./setup_docker.sh -b -t "$TAG"
+
+      - name: Tag image with commit SHA
+        run: |
+          docker tag \
+            ghcr.io/dominictwhv/cockatoo-edge:latest \
+            ghcr.io/dominictwhv/cockatoo-edge:${{ github.sha }}
+
+      - name: Push Docker images
+        run: |
+          docker push ghcr.io/dominictwhv/cockatoo-edge:latest
+          docker push ghcr.io/dominictwhv/cockatoo-edge:${{ github.sha }}

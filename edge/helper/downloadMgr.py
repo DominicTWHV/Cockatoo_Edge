@@ -1,11 +1,10 @@
-import aiohttp
+from edge.helper.aiohttpSessionFactory import SessionFactory
 
 class DownloadManager:
     
     async def download_file(self, url: str) -> str:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-
-                if response.status == 200: #normal response
-                    byte_data = await response.read() #download file
-                    return byte_data.decode('utf-8') #return as string
+        session = SessionFactory().grab_session()
+        async with session.get(url) as response:
+            response.raise_for_status()
+            content = await response.text()
+            return content
