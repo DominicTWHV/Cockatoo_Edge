@@ -12,6 +12,7 @@
 (GHCR is ONLY available for x86_64 architecture. Use [Local Build - Docker](#docker-recommended) for other architectures.)
 
 [Local Build - Docker](#docker-recommended)
+
 [Local Build - Bare Metal](#bare-metal)
 
 ## Deployment - GHCR Image:
