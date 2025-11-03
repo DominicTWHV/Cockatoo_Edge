@@ -34,7 +34,7 @@ exit #you need to start a new shell session for changes to take effect
 Pull the image
 
 ```bash
-docker pull docker pull ghcr.io/dominictwhv/cockatoo-edge:latest
+docker pull ghcr.io/dominictwhv/cockatoo-edge:latest
 ```
 
 Environment setup
@@ -67,7 +67,7 @@ Then press `ctrl + c` once and wait for the bot to terminate
 Pull the update from GHCR
 
 ```bash
-docker pull docker pull ghcr.io/dominictwhv/cockatoo-edge:latest
+docker pull ghcr.io/dominictwhv/cockatoo-edge:latest
 ```
 
 And then restart the container.
