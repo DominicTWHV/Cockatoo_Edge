@@ -18,12 +18,15 @@ class URLParser:
         user = parts[3]
         repo = parts[4]
 
+        if repo.endswith('.git'): #remove the .git suffix
+            repo = repo[:-4]
+
         if "tree" in parts:
             branch_index = parts.index("tree") + 1
             if branch_index < len(parts):
                 branch = parts[branch_index]
         
-        raw_url = f"https://raw.githubusercontent.com/{user}/{repo}/refs/heads/{branch}/" #return a raw github url for easier file download.
+        raw_url = f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/" #return a raw github url for easier file download.
 
         networking_logger.info(f"GitHub Parser: Parsed GitHub link to raw URL: {raw_url}")
 
