@@ -2,6 +2,9 @@ from edge.logger.context import networking_logger
 
 from edge.helper.aiohttpSessionFactory import SessionFactory
 
+from edge.registry.networking import SessionConfigs
+from edge.registry.exceptions import DownloadSizeExceededError
+
 class URLParser:
 
     @staticmethod
@@ -34,9 +37,34 @@ class URLParser:
 
 class DownloadManager:
     
-    async def download_file(self, url: str) -> str:
+    @staticmethod
+    async def download_file(url: str, dos_protection: bool = SessionConfigs.dos_protection, max_size: int = SessionConfigs.max_file_size) -> str:
         session = SessionFactory().grab_session()
         async with session.get(url) as response:
-            response.raise_for_status()
-            content = await response.text()
-            return content
+
+            if SessionConfigs.raise_for_status:
+                response.raise_for_status()
+
+            body = []
+            downloaded = 0
+
+            try:
+                async for chunk in response.content.iter_chunked(8192):
+                    if not isinstance(chunk, (bytes, bytearray)):
+                        # Safety net (shouldn't happen with iter_chunked)
+                        continue
+
+                    chunk_len = len(chunk)
+                    downloaded += chunk_len
+
+                    if dos_protection and downloaded > max_size:
+                        raise DownloadSizeExceededError(f"Downloaded content too large: {downloaded} bytes (limit: {SessionConfigs.max_file_size} bytes)")
+
+                    #incremental decode to handle file streaming -> avoid DoS with large text files
+                    body.append(chunk.decode(response.get_encoding()))
+
+            except Exception as e:
+                networking_logger.error(f"Download Manager: Error downloading file from {url}: {e}")
+                return ""
+
+            return "".join(body)
