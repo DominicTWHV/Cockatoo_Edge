@@ -58,7 +58,7 @@ class DownloadManager:
                     downloaded += chunk_len
 
                     if dos_protection and downloaded > max_size:
-                        raise DownloadSizeExceededError(f"Downloaded content too large: {downloaded} bytes (limit: {SessionConfigs.max_file_size} bytes)")
+                        raise DownloadSizeExceededError(f"Downloaded content too large: {downloaded} bytes (limit: {max_size} bytes)")
 
                     #incremental decode to handle file streaming -> avoid DoS with large text files
                     body.append(chunk.decode(response.get_encoding()))
