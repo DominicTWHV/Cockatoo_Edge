@@ -61,10 +61,10 @@ class DownloadManager:
                         raise DownloadSizeExceededError(f"Downloaded content too large: {downloaded} bytes (limit: {max_size} bytes)")
 
                     #incremental decode to handle file streaming -> avoid DoS with large text files
-                    body.append(chunk.decode(response.get_encoding()))
+                    body.append(chunk.decode(response.get_encoding() or 'utf-8'))
 
             except Exception as e:
                 networking_logger.error(f"Download Manager: Error downloading file from {url}: {e}")
-                return ""
+                raise
 
             return "".join(body)
