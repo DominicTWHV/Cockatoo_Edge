@@ -13,7 +13,9 @@
 
 [Local Build - Docker](#docker-recommended)
 
-[Local Build - Bare Metal](#bare-metal)
+[Local Build - Bare Metal (Linux)](#bare-metal)
+
+[Local Build - Bare Metal (Windows)](#bare-metal-windows)
 
 ## Deployment - GHCR Image:
 
@@ -118,7 +120,7 @@ Optionally, put this line into a bash file and use crontab to automatically star
 screen -dmS cockatoo docker run cockatoo_edge:latest
 ```
 
-### Bare Metal:
+### Bare Metal (Linux):
 
 Clone the repository
 
@@ -144,6 +146,40 @@ Finally, use a screen session to run the bot:
 ```bash
 screen -dmS cockatoo python3 main.py
 ```
+
+### Bare Metal (Windows):
+
+Install Python 3.12.x or above from `https://www.python.org/downloads/`
+
+Clone the repository (with Git CLI)
+
+```bash
+git clone https://github.com/DominicTWHV/Cockcatoo_Edge.git
+```
+
+Navigate to the folder, copy the `example.env` file and rename it to `.env` in the same folder.
+
+Edit the file, insert your bot token into the file.
+
+Install dependencies
+
+```bash
+python -m venv venv
+venv/Scripts/activate
+pip install -r requirements.txt
+```
+
+Run the bot with
+
+```bash
+python main.py
+```
+
+---
+
+## Changing settings
+
+
 
 ---
 
