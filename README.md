@@ -13,7 +13,7 @@
 
 [Local Build - Docker](#docker-recommended)
 
-[Local Build - Bare Metal (Linux)](#bare-metal)
+[Local Build - Bare Metal (Linux)](#bare-metal-linux)
 
 [Local Build - Bare Metal (Windows)](#bare-metal-windows)
 
@@ -154,7 +154,7 @@ Install Python 3.12.x or above from `https://www.python.org/downloads/`
 Clone the repository (with Git CLI)
 
 ```bash
-git clone https://github.com/DominicTWHV/Cockcatoo_Edge.git
+git clone https://github.com/DominicTWHV/Cockatoo_Edge.git
 ```
 
 Navigate to the folder, copy the `example.env` file and rename it to `.env` in the same folder.
@@ -179,7 +179,13 @@ python main.py
 
 ## Changing settings
 
+**For prebuilt Docker containers:**
 
+Attach the image to your console, then directly modify the values under `/app/edge/registry`. After, apply the changes by committing it into a new image.
+
+**For all other deployment methods:**
+
+Modify the files under `edge/registry`. After, either rebuild the Docker image, or just restart the app.
 
 ---
 
