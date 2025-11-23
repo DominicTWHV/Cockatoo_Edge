@@ -181,11 +181,11 @@ python main.py
 
 **For prebuilt Docker containers:**
 
-Attach the image to your console, then directly modify the values under `/app/edge/registry`. After, apply the changes by commiting it into a new image.
+Attach the image to your console, then directly modify the values under `/app/edge/registry`. After, apply the changes by committing it into a new image.
 
 **For all other deployment methods:**
 
-Modify the files under `edge/registry`, after, either rebuild the Docker image, or just restart the app.
+Modify the files under `edge/registry`. After, either rebuild the Docker image, or just restart the app.
 
 ---
 
