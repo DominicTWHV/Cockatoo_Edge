@@ -13,7 +13,7 @@
 
 [Local Build - Docker](#docker-recommended)
 
-[Local Build - Bare Metal (Linux)](#bare-metal)
+[Local Build - Bare Metal (Linux)](#bare-metal-linux)
 
 [Local Build - Bare Metal (Windows)](#bare-metal-windows)
 
