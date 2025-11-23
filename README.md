@@ -154,7 +154,7 @@ Install Python 3.12.x or above from `https://www.python.org/downloads/`
 Clone the repository (with Git CLI)
 
 ```bash
-git clone https://github.com/DominicTWHV/Cockcatoo_Edge.git
+git clone https://github.com/DominicTWHV/Cockatoo_Edge.git
 ```
 
 Navigate to the folder, copy the `example.env` file and rename it to `.env` in the same folder.
