@@ -2,7 +2,6 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from edge.registry.colors import EmbedColors
 from edge.registry.embedTemplates import Cog_Owner, General
 
 class Owner(commands.Cog, name="owner"):
