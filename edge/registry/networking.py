@@ -13,7 +13,7 @@ class SessionConfigs:
 
     #enable max file limit protection, to prevent downloading files that are too large and storing them in memory
     dos_protection = True
-    max_file_size = 2 * 1024 * 1024  # 2 MB should be sufficient for most files
+    max_file_size = 5 * 1024 * 1024  # 5 MB should be sufficient for most files
 
 class UserAgents:
     #declare identity to websites when connecting
