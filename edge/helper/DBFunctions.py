@@ -4,7 +4,7 @@ from typing import Any
 
 from edge.database.driver import SQLiteDriver, DBInitManager
 
-from edge.registry.database import PrimaryDBConf, SecurityDBConf
+from edge.registry.database import PrimaryDBConf, SecurityDBConf, MetadataDBConf
 
 class AutoDBMgr:
     
@@ -13,5 +13,9 @@ class AutoDBMgr:
 
         for db_path, db_type in [
             (PrimaryDBConf.sqlite_db_path, "primary"),
+            (SecurityDBConf.sqlite_db_path_core, "security_core"),
+            (SecurityDBConf.sqlite_db_path_generic, "security_generic"),
+            (MetadataDBConf.sqlite_db_path, "metadata"),
+            
         ]:
             await DBInitManager.init_db(db_type=db_type, db_path=db_path)
