@@ -7,7 +7,7 @@ from typing import Literal, Any
 
 from edge.logger.context import db_logger
 
-from edge.registry.database import PrimaryDBConf, SecurityDBConf
+from edge.registry.database import PrimaryDBConf, SecurityDBConf, MetadataDBConf
 
 class DBInitManager:
     @staticmethod
@@ -33,6 +33,7 @@ class DBInitManager:
             "primary": (PrimaryDBConf.sqlite_schema_path),
             "security_core": (SecurityDBConf.sqlite_schema_path_core),
             "security_generic": (SecurityDBConf.sqlite_schema_path_generic),
+            "metadata": (MetadataDBConf.sqlite_schema_path),
         }
         
         schema_path = config_map[db_type]

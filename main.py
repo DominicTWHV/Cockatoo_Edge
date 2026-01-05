@@ -82,6 +82,8 @@ class CockatooEdge(commands.Bot): # main class
 
         self.status_task.start()
 
+        self.logger.info("Initialization complete.")
+
     # events ----------------------------------------------------------
 
     async def on_ready(self):
