@@ -39,7 +39,7 @@ class DownloadManager:
     
     @staticmethod
     async def download_file(url: str, dos_protection: bool = SessionConfigs.dos_protection, max_size: int = SessionConfigs.max_file_size) -> str:
-        session = SessionFactory().grab_session()
+        session = await SessionFactory().grab_session()
         async with session.get(url) as response:
 
             if SessionConfigs.raise_for_status:
