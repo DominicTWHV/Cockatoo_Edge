@@ -18,3 +18,26 @@ class SessionConfigs:
 class UserAgents:
     #declare identity to websites when connecting
     primary = "aiohttp (compatible; CockatooEdge/1.0; +https://github.com/DominicTWHV/Cockatoo_Edge; dataset-download)"
+
+class DatasetDownloadConfigs:
+    
+    # this is a protection mechanism to avoid downloading files that are not in the allowed mime types
+    # recommended to keep enabled unless you have a specific reason to not enable it.
+    # when enabled, Cockatoo will perform an automated check of the file type based on the mime type header to ensure it matches expected types.
+    # not foolproof, always use caution when downloading files from untrusted sources.
+    validate_file_type = True
+
+    allowed_mime_types = [
+        "application/json", #Cockatoo Core dataset format are in JSON
+        "text/plain", #generic filtering lists are usually txt based
+    ]
+
+    read_chunk_size = 1024 #1 KB chunk size for reading files
+
+class FileSourceIdentConfigs:
+
+    #some github domains that may be used for file hosting, excluded gist and githubusercontent
+    github_domains = [
+        "github.com",
+        "www.github.com"
+    ]
