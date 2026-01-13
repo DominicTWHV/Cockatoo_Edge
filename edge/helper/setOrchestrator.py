@@ -1,5 +1,6 @@
 import magic # file type identification\
 import tldextract #domain extraction
+import json
 
 from edge.helper.downloadMgr import URLParser, DownloadManager
 from edge.helper.aiohttpSessionFactory import SessionFactory
@@ -7,6 +8,8 @@ from edge.helper.aiohttpSessionFactory import SessionFactory
 from edge.logger.context import networking_logger
 
 from edge.registry.networking import DatasetDownloadConfigs, FileSourceIdentConfigs
+from edge.registry.dataStructure import CoreDatasetMetadata
+from edge.registry.dataset import SetDownload
 
 class Ident:
 
@@ -66,9 +69,37 @@ class DSDownload:
         
         if source == "github": #parse out the raw github content url (raw.githubusercontent.com links will NOT be identified as github)
             raw_url = await URLParser.parse_github_url(url)
-            url = raw_url.append("metadata.json") #append the standard dataset filename for Cockatoo Core dataset format
+            metadata_url = raw_url.append("metadata.json") #append the standard dataset filename for Cockatoo Core dataset format
 
-            content = await DownloadManager.download_file(url) #download the mnetadata file into a variable
+            metadata_content = json.loads(await DownloadManager.download_file(metadata_url)) #download the mnetadata file into a variable
+
+            relevent_files = metadata_content.get(CoreDatasetMetadata.relevent_files, []) #use the registry data keying to get the relevent files list
+
+            for file_to_remove in SetDownload.removed_files:
+                if file_to_remove in relevent_files:
+                    relevent_files.remove(file_to_remove) #remove the unnecessary file from the relevent files list
+
+            #the relevent files should now only contain the actual data files we want to download
+
+            for file_to_download in relevent_files:
+                file_url = raw_url.append(file_to_download) #construct the full file url
+
+                content = await DownloadManager.download_file(file_url) #download the file content
+                json_content = json.loads(content)
+
+                #process the content as needed (not implemented here)
 
         else:
             content = await DownloadManager.download_file(url) # -> this is the set as not using cockatoo core dataset format
+
+    @staticmethod
+    async def github_download(url: str) -> str:
+        content = await DownloadManager.download_file(url)
+
+
+    
+    @staticmethod
+    async def generic_download(url: str) -> str:
+        content = await DownloadManager.download_file(url)
+
+        return content
