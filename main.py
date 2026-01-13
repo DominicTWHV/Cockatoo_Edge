@@ -76,7 +76,7 @@ class CockatooEdge(commands.Bot): # main class
 
         await AutoDBMgr.init_db() #initializes database instances, configured by edge.registry.database
 
-        await SessionFactory().create_session() #initialize aiohttp session for global use
+        await SessionFactory().create_session() #initialize aiohttp session pool for global use
 
         await self.load_cogs()
 
