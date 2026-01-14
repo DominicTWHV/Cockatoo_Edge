@@ -16,7 +16,7 @@ class Ident:
     @staticmethod
     async def remote_file_type(url: str) -> str:
         #identifies the file type of a remote file by reading a chunk of it
-        
+
         session = await SessionFactory().grab_session()
         async with session.get(url) as response:
             mime_header = response.headers.get('Content-Type', '').lower()
@@ -94,17 +94,17 @@ class DSDownload:
         #expects a root github repo url
 
         try:
-            # Parse out the raw github content url
+            #parse out the raw github content url
             raw_url = await URLParser.parse_github_url(url)
             metadata_url = f"{raw_url}/metadata.json"
 
             networking_logger.info(f"GitHub Download: Fetching metadata from {metadata_url}")
             
-            # Download and parse metadata file
+            #download and parse metadata file
             metadata_content_raw = await DownloadManager.download_file(metadata_url)
             metadata_content = json.loads(metadata_content_raw)
 
-            # Get the list of relevant files from metadata
+            #get list of relevant files from metadata
             relevent_files = metadata_content.get(CoreDatasetMetadata.relevent_files, [])
             
             if not relevent_files:
@@ -113,15 +113,17 @@ class DSDownload:
 
             networking_logger.info(f"GitHub Download: Found {len(relevent_files)} files in metadata")
 
-            # Remove unnecessary files from the list
+            #remove unnecessary files from the list (ie, metadata itself, and domains)
             for file_to_remove in SetDownload.removed_files:
                 if file_to_remove in relevent_files:
                     relevent_files.remove(file_to_remove)
                     networking_logger.debug(f"GitHub Download: Removed {file_to_remove} from download list")
 
-            # Download each relevant file
+            #download each relevant file referenced in metadata
             downloaded_count = 0
+
             for file_to_download in relevent_files:
+
                 try:
                     file_url = f"{raw_url}/{file_to_download}"
                     networking_logger.debug(f"GitHub Download: Downloading {file_to_download} from {file_url}")
@@ -204,4 +206,4 @@ class DSDownload:
             
         except Exception as e:
             networking_logger.error(f"Error processing dataset content from {source_identifier}: {str(e)}")
-            raise
+            return {"success": False, "source_identifier": source_identifier, "source_type": source_type, "message": str(e)}
