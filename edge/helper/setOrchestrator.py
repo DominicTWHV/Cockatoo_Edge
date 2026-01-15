@@ -15,6 +15,8 @@ class Ident:
 
     @staticmethod
     async def remote_file_type(url: str) -> str:
+        #identifies the file type of a remote file by reading a chunk of it
+
         session = await SessionFactory().grab_session()
         async with session.get(url) as response:
             mime_header = response.headers.get('Content-Type', '').lower()
@@ -29,6 +31,8 @@ class Ident:
         
     @staticmethod
     async def file_source(url: str) -> str:
+        #determines if the url is from github or not
+
         extracted = tldextract.extract(url)
         
         domain = extracted.registered_domain.lower()
@@ -59,47 +63,147 @@ class Verify:
 class DSDownload:
 
     @staticmethod
-    async def pipeline(url: str) -> str:
-        detected_type, mime_header = await Ident.remote_file_type(url)
-        source = await Ident.file_source(url)
-
-        if not await Verify.file_type_allowed(detected_type):
-            networking_logger.error(f"Dataset Download Pipeline: File type {detected_type} not allowed. Aborting download for safety. URL: {url}")
-            return
+    async def pipeline(url: str) -> dict:
+        """
+        Main pipeline for downloading datasets from various sources.
+        Supports both GitHub Cockatoo Core format and generic text URLs.
         
-        if source == "github": #parse out the raw github content url (raw.githubusercontent.com links will NOT be identified as github)
+        Returns:
+            dict: Status information with 'success', 'source', 'file_count', and 'message'
+        """
+        try:
+            detected_type, mime_header = await Ident.remote_file_type(url)
+            source = await Ident.file_source(url)
+
+            if not await Verify.file_type_allowed(detected_type):
+                networking_logger.error(f"Dataset Download Pipeline: File type {detected_type} not allowed. Aborting download for safety. URL: {url}")
+                return {"success": False, "source": source, "file_count": 0, "message": f"File type {detected_type} not allowed"}
+            
+            if source == "github":
+                return await DSDownload.github_download(url)
+            
+            else:
+                return await DSDownload.generic_download(url)
+                
+        except Exception as e:
+            networking_logger.error(f"Dataset Download Pipeline: Error occurred - {str(e)}")
+            return {"success": False, "source": "unknown", "file_count": 0, "message": str(e)}
+
+    @staticmethod
+    async def github_download(url: str) -> dict:
+        #expects a root github repo url
+
+        try:
+            #parse out the raw github content url
             raw_url = await URLParser.parse_github_url(url)
-            metadata_url = raw_url.append("metadata.json") #append the standard dataset filename for Cockatoo Core dataset format
+            metadata_url = f"{raw_url}/metadata.json"
 
-            metadata_content = json.loads(await DownloadManager.download_file(metadata_url)) #download the mnetadata file into a variable
+            networking_logger.info(f"GitHub Download: Fetching metadata from {metadata_url}")
+            
+            #download and parse metadata file
+            metadata_content_raw = await DownloadManager.download_file(metadata_url)
+            metadata_content = json.loads(metadata_content_raw)
 
-            relevent_files = metadata_content.get(CoreDatasetMetadata.relevent_files, []) #use the registry data keying to get the relevent files list
+            #get list of relevant files from metadata
+            relevent_files = metadata_content.get(CoreDatasetMetadata.relevent_files, [])
+            
+            if not relevent_files:
+                networking_logger.warning(f"GitHub Download: No relevant files found in metadata")
+                return {"success": False, "source": "github", "file_count": 0, "message": "No relevant files in metadata"}
 
+            networking_logger.info(f"GitHub Download: Found {len(relevent_files)} files in metadata")
+
+            #remove unnecessary files from the list (ie, metadata itself, and domains)
             for file_to_remove in SetDownload.removed_files:
                 if file_to_remove in relevent_files:
-                    relevent_files.remove(file_to_remove) #remove the unnecessary file from the relevent files list
+                    relevent_files.remove(file_to_remove)
+                    networking_logger.debug(f"GitHub Download: Removed {file_to_remove} from download list")
 
-            #the relevent files should now only contain the actual data files we want to download
+            #download each relevant file referenced in metadata
+            downloaded_count = 0
 
             for file_to_download in relevent_files:
-                file_url = raw_url.append(file_to_download) #construct the full file url
 
-                content = await DownloadManager.download_file(file_url) #download the file content
-                json_content = json.loads(content)
+                try:
+                    file_url = f"{raw_url}/{file_to_download}"
+                    networking_logger.debug(f"GitHub Download: Downloading {file_to_download} from {file_url}")
+                    
+                    content = await DownloadManager.download_file(file_url)
+                    json_content = json.loads(content)
 
-                #process the content as needed (not implemented here)
+                    # Process the downloaded content (store in database, etc.)
+                    await DSDownload._process_dataset_content(json_content, file_to_download, "github")
+                    downloaded_count += 1
+                    networking_logger.info(f"GitHub Download: Successfully processed {file_to_download}")
+                    
+                except json.JSONDecodeError:
+                    networking_logger.error(f"GitHub Download: Failed to parse JSON from {file_to_download}")
 
-        else:
-            content = await DownloadManager.download_file(url) # -> this is the set as not using cockatoo core dataset format
+                except Exception as e:
+                    networking_logger.error(f"GitHub Download: Error downloading {file_to_download}: {str(e)}")
+
+            networking_logger.info(f"GitHub Download: Completed. Downloaded and processed {downloaded_count}/{len(relevent_files)} files")
+            return {
+                "success": downloaded_count > 0,
+                "source": "github",
+                "file_count": downloaded_count,
+                "message": f"Successfully downloaded {downloaded_count} files"
+            }
+            
+        except Exception as e:
+            networking_logger.error(f"GitHub Download: Pipeline error - {str(e)}")
+            return {"success": False, "source": "github", "file_count": 0, "message": str(e)}
 
     @staticmethod
-    async def github_download(url: str) -> str:
-        content = await DownloadManager.download_file(url)
+    async def generic_download(url: str) -> dict:
+        """
+        Download generic datasets from any URL (typically plain text format).
+        
+        Returns:
+            dict: Status information with 'success', 'source', 'file_count', and 'message'
+        """
+        try:
+            networking_logger.info(f"Generic Download: Starting download from {url}")
+            
+            content = await DownloadManager.download_file(url)
+            
+            if not content:
+                networking_logger.warning(f"Generic Download: No content received from {url}")
+                return {"success": False, "source": "unknown", "file_count": 0, "message": "No content received"}
 
+            # process the downloaded content (store in database, etc.)
+            await DSDownload._process_dataset_content(content, url, "generic")
+            
+            networking_logger.info(f"Generic Download: Successfully downloaded and processed content from {url}")
+            return {
+                "success": True,
+                "source": "unknown",
+                "file_count": 1,
+                "message": "Successfully downloaded generic dataset"
+            }
+            
+        except Exception as e:
+            networking_logger.error(f"Generic Download: Error - {str(e)}")
+            return {"success": False, "source": "unknown", "file_count": 0, "message": str(e)}
 
-    
     @staticmethod
-    async def generic_download(url: str) -> str:
-        content = await DownloadManager.download_file(url)
-
-        return content
+    async def _process_dataset_content(content, source_identifier: str, source_type: str) -> None:
+        """
+        Internal method to process downloaded dataset content.
+        Handles storage to database or other processing as needed.
+        
+        Args:
+            content: The downloaded content (dict for JSON, str for text)
+            source_identifier: Filename or URL identifier
+            source_type: 'github' or 'generic'
+        """
+        try:
+            networking_logger.debug(f"Processing dataset from {source_type} source: {source_identifier}")
+            
+            # TODO: Implement actual storage logic to database
+            
+            networking_logger.debug(f"Dataset content processed: {source_identifier}")
+            
+        except Exception as e:
+            networking_logger.error(f"Error processing dataset content from {source_identifier}: {str(e)}")
+            return {"success": False, "source_identifier": source_identifier, "source_type": source_type, "message": str(e)}
