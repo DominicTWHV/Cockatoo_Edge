@@ -92,3 +92,13 @@ class General:
             color=EmbedColors.lavender,
         )
         return embed
+    
+class Cog_General:
+    
+    @staticmethod
+    async def ping(latency: int) -> discord.Embed:
+        embed = discord.Embed(
+            title="Ping", color=EmbedColors.lavender
+        )
+        embed.add_field(name="Discord API Gateway Latency:", value=f"{latency}ms", inline=True)
+        return embed
