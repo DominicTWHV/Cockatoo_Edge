@@ -8,3 +8,5 @@ logs/
 
 
 test.py
+
+.pytest_cache/
