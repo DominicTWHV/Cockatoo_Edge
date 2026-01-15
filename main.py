@@ -66,12 +66,9 @@ class CockatooEdge(commands.Bot): # main class
         self.logger.info(f"Waiting for background tasks to start up...")
 
     async def setup_hook(self) -> None:
-        self.test_env = True if not self.user else self.test_env
-        if self.test_env:
-            self.logger.warning("Running in testing environment. Some features may be disabled. If this message isn't expected, something has gone horribly wrong.")
 
         self.logger.info("Initializing bot...")
-        self.logger.info(f"Logged in as {"TestBot" if self.test_env else self.user.name}") # this allows tests to complete without discord beaming back the bot name
+        self.logger.info(f"Logged in as {self.user.name}")
         self.logger.info(f"discord.py API version: {discord.__version__}")
         self.logger.info(f"Python version: {platform.python_version()}")
         self.logger.info(f"Running on: {platform.platform()} {platform.release()} ({os.name}) | Arch: {platform.machine()}")
@@ -86,11 +83,7 @@ class CockatooEdge(commands.Bot): # main class
 
         await self.load_cogs()
 
-        if not self.test_env: #don't start status task in testing environment
-            self.status_task.start()
-
-        else:
-            self.logger.warning("Skipping status task initialization. Running in testing environment.")
+        self.status_task.start()
 
         self.logger.info("Initialization complete.")
 
