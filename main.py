@@ -64,6 +64,7 @@ class CockatooEdge(commands.Bot): # main class
         self.logger.info(f"Waiting for background tasks to start up...")
 
     async def setup_hook(self) -> None:
+
         self.logger.info("Initializing bot...")
         self.logger.info(f"Logged in as {self.user.name}")
         self.logger.info(f"discord.py API version: {discord.__version__}")
@@ -115,9 +116,10 @@ class CockatooEdge(commands.Bot): # main class
     async def on_message(self, message: discord.Message) -> None: #on message
 
         if message.author == self.user or message.author.bot:
-            return
+            pass
         
         #add message processing here
+        pass
     
     async def on_message_delete(self, message: discord.Message): #on message delete
         pass

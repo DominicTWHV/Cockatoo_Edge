@@ -3,8 +3,11 @@ venv/
 __pycache__/
 
 *.log
-logs/
+!logs/persist
+
 .vscode/
 
 
 test.py
+
+.pytest_cache/

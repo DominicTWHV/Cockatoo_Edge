@@ -1,0 +1,6 @@
+-r ../requirements.txt
+
+#test dependencies
+pytest
+pytest-asyncio
+dpytest>=0.7.0
