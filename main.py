@@ -116,9 +116,10 @@ class CockatooEdge(commands.Bot): # main class
     async def on_message(self, message: discord.Message) -> None: #on message
 
         if message.author == self.user or message.author.bot:
-            return
+            pass
         
         #add message processing here
+        pass
     
     async def on_message_delete(self, message: discord.Message): #on message delete
         pass
