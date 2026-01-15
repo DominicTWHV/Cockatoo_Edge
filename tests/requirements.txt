@@ -3,4 +3,4 @@
 #test dependencies
 pytest
 pytest-asyncio
-dpytest
+dpytest>=0.7.0
