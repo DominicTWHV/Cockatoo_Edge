@@ -37,8 +37,6 @@ class CockatooEdge(commands.Bot): # main class
         self.logger = cockatoo_logger
         self.db_logger = db_logger
 
-        self.test_env = False
-
     async def load_cogs(self) -> None:
         for file in os.listdir(f"{os.path.realpath(os.path.dirname(__file__))}/commands"):
             if file.endswith(".py"):
