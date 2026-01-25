@@ -5,11 +5,13 @@ import json
 from edge.helper.downloadMgr import URLParser, DownloadManager
 from edge.helper.aiohttpSessionFactory import SessionFactory
 
-from edge.logger.context import networking_logger
+from edge.helper.DBFunctions import MetadataDB
+
+from edge.logger.context import networking_logger, update_logger
 
 from edge.registry.networking import DatasetDownloadConfigs, FileSourceIdentConfigs
 from edge.registry.dataStructure import CoreDatasetMetadata
-from edge.registry.dataset import SetDownload
+from edge.registry.dataset import SetDownload, GithubMetaStore, GenericMetaStore
 
 class Ident:
 
@@ -66,36 +68,41 @@ class DSDownload:
     async def pipeline(url: str) -> dict:
         """
         Main pipeline for downloading datasets from various sources.
-        Supports both GitHub Cockatoo Core format and generic text URLs.
+        Supports both GitHub (Cockatoo Core format) and generic text URLs (such as URLhaus, etc.)
         
         Returns:
             dict: Status information with 'success', 'source', 'file_count', and 'message'
         """
         try:
-            detected_type, mime_header = await Ident.remote_file_type(url)
             source = await Ident.file_source(url)
+
+            type_check_url = f"{await URLParser.parse_github_url(url)}/metadata.json" if source == "github" else url
+
+            detected_type, _ = await Ident.remote_file_type(type_check_url) # run type checking AFTER parsing to raw link if github
 
             if not await Verify.file_type_allowed(detected_type):
                 networking_logger.error(f"Dataset Download Pipeline: File type {detected_type} not allowed. Aborting download for safety. URL: {url}")
                 return {"success": False, "source": source, "file_count": 0, "message": f"File type {detected_type} not allowed"}
             
             if source == "github":
-                return await DSDownload.github_download(url)
+                return await Helpers.github_download(url) #parsed to raw.githubusercontent.com link
             
             else:
-                return await DSDownload.generic_download(url)
+                return await Helpers.generic_download(url)
+            
+            
                 
         except Exception as e:
             networking_logger.error(f"Dataset Download Pipeline: Error occurred - {str(e)}")
             return {"success": False, "source": "unknown", "file_count": 0, "message": str(e)}
 
+class Helpers:
     @staticmethod
     async def github_download(url: str) -> dict:
-        #expects a root github repo url
+        #expects a link to base github repository
 
         try:
-            #parse out the raw github content url
-            raw_url = await URLParser.parse_github_url(url)
+            raw_url = await URLParser.parse_github_url(url)  #convert to raw.githubusercontent.com link
             metadata_url = f"{raw_url}/metadata.json"
 
             networking_logger.info(f"GitHub Download: Fetching metadata from {metadata_url}")
@@ -103,6 +110,8 @@ class DSDownload:
             #download and parse metadata file
             metadata_content_raw = await DownloadManager.download_file(metadata_url)
             metadata_content = json.loads(metadata_content_raw)
+
+            await Helpers.github_metadata_store(metadata_content, url) #store metadata in database
 
             #get list of relevant files from metadata
             relevent_files = metadata_content.get(CoreDatasetMetadata.relevent_files, [])
@@ -126,13 +135,19 @@ class DSDownload:
 
                 try:
                     file_url = f"{raw_url}/{file_to_download}"
+
+                    file_type, _ = await Ident.remote_file_type(file_url)
+                    if not await Verify.file_type_allowed(file_type):
+                        networking_logger.error(f"GitHub Download: File type {file_type} referenced in metadata not allowed. Skipping download. | Reference URL: {file_url}")
+                        return {"success": False, "source": file_url, "file_count": 0, "message": f"File type {file_type} not allowed"}
+
                     networking_logger.debug(f"GitHub Download: Downloading {file_to_download} from {file_url}")
                     
                     content = await DownloadManager.download_file(file_url)
                     json_content = json.loads(content)
 
-                    # Process the downloaded content (store in database, etc.)
-                    await DSDownload._process_dataset_content(json_content, file_to_download, "github")
+                    # Process the downloaded content
+                    await Helpers._process_dataset_content(json_content, file_to_download, "github")
                     downloaded_count += 1
                     networking_logger.info(f"GitHub Download: Successfully processed {file_to_download}")
                     
@@ -153,6 +168,33 @@ class DSDownload:
         except Exception as e:
             networking_logger.error(f"GitHub Download: Pipeline error - {str(e)}")
             return {"success": False, "source": "github", "file_count": 0, "message": str(e)}
+        
+    @staticmethod
+    async def github_metadata_store(metadata: dict, repository: str) -> None:
+        """
+        Store GitHub dataset metadata into the database.
+        """
+        try:
+            db = MetadataDB()
+
+            entry_values = []
+
+            entry_values.append(metadata.get(CoreDatasetMetadata.licensing, "unknown"))
+            entry_values.append(metadata.get(CoreDatasetMetadata.dataset_format, "unknown"))
+            entry_values.append(metadata.get(CoreDatasetMetadata.remote_update_interval, 0))
+
+            entry_values.append(metadata.get(CoreDatasetMetadata.num_of_url_entries, 0))
+            entry_values.append(metadata.get(CoreDatasetMetadata.num_of_file_entries, 0))
+            entry_values.append(metadata.get(CoreDatasetMetadata.num_of_invite_entries, 0))
+
+            await db.update_dataset_metadata(repository, GithubMetaStore.entry_names, entry_values)
+            update_logger.info(f"GitHub Metadata Store: Successfully stored dataset metadata for {repository}")
+
+            await db.update_dataset(repository, [], [])  # mark dataset as enabled upon successful metadata storage
+            update_logger.info(f"GitHub Metadata Store: default entry created for dataset @ {repository}")
+
+        except Exception as e:
+            update_logger.error(f"GitHub Metadata Store: Error storing dataset metadata for {repository}: {str(e)}")
 
     @staticmethod
     async def generic_download(url: str) -> dict:
@@ -171,8 +213,10 @@ class DSDownload:
                 networking_logger.warning(f"Generic Download: No content received from {url}")
                 return {"success": False, "source": "unknown", "file_count": 0, "message": "No content received"}
 
-            # process the downloaded content (store in database, etc.)
-            await DSDownload._process_dataset_content(content, url, "generic")
+            await Helpers.generic_metadata_store(url)  #store basic metadata for generic dataset
+
+            # process the downloaded content
+            await Helpers._process_dataset_content(content, url, "generic")
             
             networking_logger.info(f"Generic Download: Successfully downloaded and processed content from {url}")
             return {
@@ -185,6 +229,28 @@ class DSDownload:
         except Exception as e:
             networking_logger.error(f"Generic Download: Error - {str(e)}")
             return {"success": False, "source": "unknown", "file_count": 0, "message": str(e)}
+        
+    @staticmethod
+    async def generic_metadata_store(url: str) -> None:
+        """
+        Store generic dataset metadata into the database.
+        """
+        try:
+            db = MetadataDB()
+
+            entry_values = []
+
+            entry_values.append("unknown")  # licensing
+            entry_values.append("generic")  # dataset_format
+
+            await db.update_dataset_metadata(url, GenericMetaStore.entry_names, entry_values)
+            update_logger.info(f"Generic Metadata Store: Successfully stored dataset metadata for {url}")
+
+            await db.update_dataset(url, [], [])  # mark dataset as enabled upon successful metadata storage
+            update_logger.info(f"Generic Metadata Store: default entry created for dataset @ {url}")
+
+        except Exception as e:
+            update_logger.error(f"Generic Metadata Store: Error storing dataset metadata for {url}: {str(e)}")
 
     @staticmethod
     async def _process_dataset_content(content, source_identifier: str, source_type: str) -> None:
@@ -194,7 +260,7 @@ class DSDownload:
         
         Args:
             content: The downloaded content (dict for JSON, str for text)
-            source_identifier: Filename or URL identifier
+            source_identifier: URL of dataset
             source_type: 'github' or 'generic'
         """
         try:
@@ -207,3 +273,4 @@ class DSDownload:
         except Exception as e:
             networking_logger.error(f"Error processing dataset content from {source_identifier}: {str(e)}")
             return {"success": False, "source_identifier": source_identifier, "source_type": source_type, "message": str(e)}
+        
