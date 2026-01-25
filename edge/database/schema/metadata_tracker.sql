@@ -21,8 +21,7 @@ CREATE TABLE IF NOT EXISTS `datasets` (
     `repository_url` VARCHAR, -- github repository, ex: https://github.com/DominicTWHV/CTI-DB-DUMP/ | If using a txt dataset, the url will be stored if the dataset isn't on github.
 
     `auto_update` INT DEFAULT 1, -- whether to auto update the security dataset or not (1 = true, 0 = false)
-    `update_interval` INT DEFAULT 0, -- interval to pull in dataset updates in minutes. Use 0 to set the time automatically
-    `update_config` INT DEFAULT 1, -- whether to read update interval from supported repo (i.e. Cockatoo Core format), (1 = adapt from remote, 0 = manual). Will always be manual if the set does not support this (generic txts)
+    `update_interval` INT DEFAULT 0, -- interval to pull in dataset updates in minutes. Use 0 to set the time automatically. If non-zero, this will override the value in dataset_metadata table.
 
     `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
