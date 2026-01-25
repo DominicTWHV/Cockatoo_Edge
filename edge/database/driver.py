@@ -294,3 +294,27 @@ class SQLiteDriver:
         except Exception as e:
             db_logger.error(f"SQLite: Failed to wipe table {table_name}: Error: {str(e)}")
             return False
+        
+    # special functions for specific requirements
+
+    async def special_ins_w_uid(self, table_name: str, columns: list[str], values: list[Any], silence: bool = False) -> bool:
+        if len(columns) != len(values):
+            return False
+
+        try:
+            async with aiosqlite.connect(self.db_path) as db:
+                placeholders = ", ".join("?" for _ in values)
+                col_clause = ", ".join(columns)
+                
+                query = f"INSERT INTO {table_name} ({col_clause}) VALUES ({placeholders})"
+                
+                await db.execute(query, values)
+                await db.commit()
+                
+                if not silence:
+                    db_logger.info(f"SQLite: Logged new entry in {table_name}")
+                return True
+                
+        except Exception as e:
+            db_logger.error(f"SQLite: Failed to insert entry in {table_name}: {str(e)}")
+            return False
