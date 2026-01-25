@@ -7,3 +7,7 @@ class CoreDatasetMetadata:
     licensing = "licensing"
 
     relevent_files = "relevent_files"
+
+    num_of_url_entries = "num_of_url_entries"
+    num_of_file_entries = "num_of_file_entries"
+    num_of_invite_entries = "num_of_invite_entries"
