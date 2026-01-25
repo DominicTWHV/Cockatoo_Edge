@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `actions` (
+CREATE TABLE IF NOT EXISTS `configs` (
     `server_id` VARCHAR PRIMARY KEY, -- server identifier
 
     `mal_url_action` INT DEFAULT 0, -- action to take on malicious URL detection (0 = log, 1 = warn, 2 = delete and warn)

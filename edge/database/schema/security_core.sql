@@ -1,9 +1,6 @@
 CREATE TABLE IF NOT EXISTS `url_cache` (
-  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-
+  `url_hash` VARCHAR(64) PRIMARY KEY,
   `url` TEXT NOT NULL,
-
-  `url_hash` VARCHAR(64) NOT NULL,
 
   `times_seen` INT DEFAULT 1, -- how many times this url has been seen by core
   `scan_result` VARCHAR,
