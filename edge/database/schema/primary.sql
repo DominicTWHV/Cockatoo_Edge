@@ -1,14 +1,3 @@
-CREATE TABLE IF NOT EXISTS `configs` (
-    `security_repository_url` VARCHAR, -- github repository for url security dataset, ex: DominicTWHV/CTI-DB-DUMP
-    `security_repository_file` VARCHAR, -- github file path for file security dataset
-    `security_repository_invite` VARCHAR, -- github file path for invite security dataset (all three can be the same if supported)
-
-    `auto_update` INT DEFAULT 1, -- whether to auto update the security dataset or not (1 = true, 0 = false)
-    `update_interval` INT DEFAULT 0, -- interval to pull in dataset updates in minutes. Use 0 to set the time automatically
-
-    `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE IF NOT EXISTS `actions` (
     `server_id` VARCHAR PRIMARY KEY, -- server identifier
 
@@ -18,3 +7,17 @@ CREATE TABLE IF NOT EXISTS `actions` (
 
     `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
+
+CREATE TABLE IF NOT EXISTS `moderation_logs` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    `server_id` VARCHAR, -- server identifier
+    `user_id` VARCHAR, -- user identifier
+    `triggered_by` VARCHAR, -- url/file/invite that triggered the action
+    `action_taken` VARCHAR, -- action taken (log/warn/delete)
+
+    `malicious_entry` VARCHAR, -- the malicious url/file/invite detected
+    `source_dataset` VARCHAR, -- dataset from which the malicious entry originated
+
+    `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP -- time of the action
+);

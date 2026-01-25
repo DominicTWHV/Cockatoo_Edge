@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `url_cache` (
 
   `times_seen` INT DEFAULT 1, -- how many times this url has been seen by core
 
-  `mother_set_name` VARCHAR, -- the dataset this url originated from
+  `parent_set_name` VARCHAR, -- the dataset this url originated from
   
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP -- auto timestamp for last seen time
 );
@@ -15,15 +15,15 @@ CREATE TABLE IF NOT EXISTS `url_cache` (
 CREATE TABLE IF NOT EXISTS `file_hash_cache` (
   `sha256` VARCHAR PRIMARY KEY,
 
-  `mother_set_name` VARCHAR, -- the dataset this url originated from
+  `parent_set_name` VARCHAR, -- the dataset this url originated from
 
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP -- auto timestamp for last seen time
 );
 
 CREATE TABLE IF NOT EXISTS `invite_cache` (
-  `invite` VARCHAR PRIMARY KEY, -- will be a sha256 hash
+  `invite` VARCHAR PRIMARY KEY, -- will be a argon2id hash
 
-  `mother_set_name` VARCHAR, -- the dataset this url originated from
+  `parent_set_name` VARCHAR, -- the dataset this url originated from
 
   `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP -- auto timestamp for last seen time
 );
