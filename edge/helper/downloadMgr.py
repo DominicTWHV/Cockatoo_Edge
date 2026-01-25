@@ -1,3 +1,5 @@
+import codecs
+
 from edge.logger.context import networking_logger
 
 from edge.helper.aiohttpSessionFactory import SessionFactory
@@ -40,28 +42,36 @@ class DownloadManager:
     @staticmethod
     async def download_file(url: str, dos_protection: bool = SessionConfigs.dos_protection, max_size: int = SessionConfigs.max_file_size) -> str:
         session = await SessionFactory().grab_session()
+        
         async with session.get(url) as response:
-
             if SessionConfigs.raise_for_status:
                 response.raise_for_status()
 
+            # determine encoding header, if not available default to utf-8
+            encoding = response.charset or 'utf-8'
+            
+            # incremental decoder setup
+            decoder = codecs.getincrementaldecoder(encoding)(errors='replace')
+            
             body = []
             downloaded = 0
 
             try:
                 async for chunk in response.content.iter_chunked(8192):
-                    if not isinstance(chunk, (bytes, bytearray)):
-                        # Safety net (shouldn't happen with iter_chunked)
-                        continue
-
                     chunk_len = len(chunk)
                     downloaded += chunk_len
 
                     if dos_protection and downloaded > max_size:
-                        raise DownloadSizeExceededError(f"Downloaded content too large: {downloaded} bytes (limit: {max_size} bytes)")
+                        raise DownloadSizeExceededError(
+                            f"Downloaded content too large: {downloaded} bytes (limit: {max_size} bytes)"
+                        )
 
-                    #incremental decode to handle file streaming -> avoid DoS with large text files
-                    body.append(chunk.decode(response.get_encoding() or 'utf-8'))
+                    # buffers partial multi-byte characters
+                    decoded_chunk = decoder.decode(chunk, final=False)
+                    body.append(decoded_chunk)
+
+                # finalize decoder to flush any remaining bytes
+                body.append(decoder.decode(b'', final=True))
 
             except Exception as e:
                 networking_logger.error(f"Download Manager: Error downloading file from {url}: {e}")
