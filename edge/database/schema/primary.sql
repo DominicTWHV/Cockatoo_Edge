@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `actions` (
     `mal_invite_action` INT DEFAULT 0, -- action to take on malicious invite detection (0 = log, 1 = warn, 2 = delete and warn)
 
     `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
+);
 
 CREATE TABLE IF NOT EXISTS `moderation_logs` (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
