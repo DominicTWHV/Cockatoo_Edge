@@ -1,4 +1,4 @@
-import magic # file type identification\
+import magic # file type identification
 import tldextract #domain extraction
 import json
 
@@ -85,13 +85,11 @@ class DSDownload:
                 return {"success": False, "source": source, "file_count": 0, "message": f"File type {detected_type} not allowed"}
             
             if source == "github":
-                return await Helpers.github_download(url) #parsed to raw.githubusercontent.com link
+                return await Helpers.github_download(url) # expects url in the format of https://github.com/user/repo
             
             else:
                 return await Helpers.generic_download(url)
             
-            
-                
         except Exception as e:
             networking_logger.error(f"Dataset Download Pipeline: Error occurred - {str(e)}")
             return {"success": False, "source": "unknown", "file_count": 0, "message": str(e)}
