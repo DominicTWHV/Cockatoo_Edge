@@ -3,6 +3,7 @@
 
 > [!IMPORTANT]
 > Work in progress — NOT production ready.
+> Waiting for readme revision
 
 [![CodeQL](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/github-code-scanning/codeql) [![GHCR Build](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/build-docker.yml/badge.svg)](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/build-docker.yml) [![Python Tests](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/pytest.yml/badge.svg)](https://github.com/DominicTWHV/Cockatoo_Edge/actions/workflows/pytest.yml)
 ---
