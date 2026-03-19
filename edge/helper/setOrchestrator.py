@@ -14,6 +14,7 @@ from edge.registry.dataStructure import CoreDatasetMetadata
 from edge.registry.dataset import SetDownload, GithubMetaStore, GenericMetaStore
 
 class Ident:
+    # remote/local file metadata/typing service
 
     @staticmethod
     async def remote_file_type(url: str) -> str:
@@ -67,6 +68,8 @@ class DSDownload:
     @staticmethod
     async def pipeline(url: str) -> dict:
         """
+        This is an entrypoint function
+
         Main pipeline for downloading datasets from various sources.
         Supports both GitHub (Cockatoo Core format) and generic text URLs (such as URLhaus, etc.)
         
@@ -109,7 +112,7 @@ class Helpers:
             metadata_content_raw = await DownloadManager.download_file(metadata_url)
             metadata_content = json.loads(metadata_content_raw)
 
-            await Helpers.github_metadata_store(metadata_content, url) #store metadata in database
+            await Store.github_metadata_store(metadata_content, url) #store metadata in database
 
             #get list of relevant files from metadata
             relevent_files = metadata_content.get(CoreDatasetMetadata.relevent_files, [])
@@ -166,12 +169,48 @@ class Helpers:
         except Exception as e:
             networking_logger.error(f"GitHub Download: Pipeline error - {str(e)}")
             return {"success": False, "source": "github", "file_count": 0, "message": str(e)}
+
+    @staticmethod
+    async def generic_download(url: str) -> dict:
+        """
+        Download generic datasets from any URL (typically plain text format).
         
+        Returns:
+            dict: Status information with 'success', 'source', 'file_count', and 'message'
+        """
+        try:
+            networking_logger.info(f"Generic Download: Starting download from {url}")
+            
+            content = await DownloadManager.download_file(url)
+            
+            if not content:
+                networking_logger.warning(f"Generic Download: No content received from {url}")
+                return {"success": False, "source": "unknown", "file_count": 0, "message": "No content received"}
+
+            await Store.generic_metadata_store(url)  #store basic metadata for generic dataset
+
+            # process the downloaded content
+            await Helpers._process_dataset_content(content, url, "generic")
+            
+            networking_logger.info(f"Generic Download: Successfully downloaded and processed content from {url}")
+            return {
+                "success": True,
+                "source": "generic",
+                "file_count": 1,
+                "message": "Successfully downloaded generic dataset"
+            }
+            
+        except Exception as e:
+            networking_logger.error(f"Generic Download: Error - {str(e)}")
+            return {"success": False, "source": "generic", "file_count": 0, "message": str(e)}
+        
+class Store:
+
     @staticmethod
     async def github_metadata_store(metadata: dict, repository: str) -> None:
-        """
-        Store GitHub dataset metadata into the database.
-        """
+        # used to store metadata (Cockatoo Core only) into the local database
+        # if the input metadata is invalid, default to 0/unknown values
+
         try:
             db = MetadataDB()
 
@@ -195,44 +234,9 @@ class Helpers:
             update_logger.error(f"GitHub Metadata Store: Error storing dataset metadata for {repository}: {str(e)}")
 
     @staticmethod
-    async def generic_download(url: str) -> dict:
-        """
-        Download generic datasets from any URL (typically plain text format).
-        
-        Returns:
-            dict: Status information with 'success', 'source', 'file_count', and 'message'
-        """
-        try:
-            networking_logger.info(f"Generic Download: Starting download from {url}")
-            
-            content = await DownloadManager.download_file(url)
-            
-            if not content:
-                networking_logger.warning(f"Generic Download: No content received from {url}")
-                return {"success": False, "source": "unknown", "file_count": 0, "message": "No content received"}
-
-            await Helpers.generic_metadata_store(url)  #store basic metadata for generic dataset
-
-            # process the downloaded content
-            await Helpers._process_dataset_content(content, url, "generic")
-            
-            networking_logger.info(f"Generic Download: Successfully downloaded and processed content from {url}")
-            return {
-                "success": True,
-                "source": "unknown",
-                "file_count": 1,
-                "message": "Successfully downloaded generic dataset"
-            }
-            
-        except Exception as e:
-            networking_logger.error(f"Generic Download: Error - {str(e)}")
-            return {"success": False, "source": "unknown", "file_count": 0, "message": str(e)}
-        
-    @staticmethod
     async def generic_metadata_store(url: str) -> None:
-        """
-        Store generic dataset metadata into the database.
-        """
+        # store metadata for generic url datasets
+
         try:
             db = MetadataDB()
 
