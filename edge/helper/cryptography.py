@@ -29,6 +29,7 @@ class Argon2ID:
     async def verify(input_str: str, hash_str: str) -> bool:
         try:
             ph.verify(hash_str, input_str)
-            return True
+            return True # content matches
+
         except argon2.exceptions.VerifyMismatchError:
-            return False
+            return False # mismatch
