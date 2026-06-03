@@ -227,8 +227,9 @@ class Store:
             await db.update_dataset_metadata(repository, GithubMetaStore.entry_names, entry_values)
             update_logger.info(f"GitHub Metadata Store: Successfully stored dataset metadata for {repository}")
 
-            await db.update_dataset(repository, [], [])  # mark dataset as enabled upon successful metadata storage
-            update_logger.info(f"GitHub Metadata Store: default entry created for dataset @ {repository}")
+            await db.update_dataset(repository, ["enabled"], [1])  # mark dataset as enabled upon successful metadata storage
+            # set enabled to 1 by default to enable set
+            update_logger.info(f"GitHub Metadata Store: Default entry created for dataset @ {repository}")
 
         except Exception as e:
             update_logger.error(f"GitHub Metadata Store: Error storing dataset metadata for {repository}: {str(e)}")
