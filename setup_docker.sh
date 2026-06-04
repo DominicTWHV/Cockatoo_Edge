@@ -109,7 +109,8 @@ if [ "$BUILD_CONTAINER" = true ]; then
         exit 1
     fi
     
-    if ! docker build -t "$TAG" .; then
+    echo "[🐋] Building image..."
+    if ! TAG="$TAG" docker compose build; then
         echo "[🐋] Error: Docker build failed"
         exit 1
     fi
@@ -149,7 +150,7 @@ fi
 
 if [ "$RUN_CONTAINER" = true ]; then
     echo "[🐋] Running container..."
-    if ! docker run "$TAG"; then
+    if ! TAG="$TAG" docker compose up -d; then
         echo "[🐋] Error: Failed to run container"
         exit 1
     fi

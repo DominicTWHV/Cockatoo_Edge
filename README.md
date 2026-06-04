@@ -54,26 +54,15 @@ echo 'TOKEN=<your token here>' >> .env
 Running
 
 ```bash
-screen -dmS cockatoo docker run --env-file .env ghcr.io/dominictwhv/cockatoo-edge
+docker compose up -d
 ```
 
 Updating the image
 
-Stop the container
-
 ```bash
-screen -r cockatoo
+docker compose pull
+docker compose up -d
 ```
-
-Then press `ctrl + c` once and wait for the bot to terminate
-
-Pull the update from GHCR
-
-```bash
-docker pull ghcr.io/dominictwhv/cockatoo-edge:latest
-```
-
-And then restart the container.
 
 ## Deployment - Local Build:
 
@@ -107,18 +96,10 @@ Insert your Discord bot token into the `.env` file, then use `ctrl+o ctrl+x` to 
 
 Next, configure settings, they are located within Cockatoo_Edge/edge/registry with a `.py` suffix. This step is optional, default settings will work fine out of the box.
 
-Use the provided Docker build script to automate the build process
+Build and run the bot with Docker Compose
 
 ```bash
-./setup_docker.sh -b -t -c
-```
-
-Run the bot in a screen session
-
-Optionally, put this line into a bash file and use crontab to automatically start the bot upon reboot.
-
-```bash
-screen -dmS cockatoo docker run cockatoo_edge:latest
+docker compose up -d --build
 ```
 
 ### Bare Metal (Linux):

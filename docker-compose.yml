@@ -1,0 +1,16 @@
+services:
+  cockatoo-edge:
+    build: .
+    image: ${TAG:-cockatoo_edge:latest}
+    container_name: cockatoo-edge
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./edge/database/sqlite:/app/edge/database/sqlite
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
