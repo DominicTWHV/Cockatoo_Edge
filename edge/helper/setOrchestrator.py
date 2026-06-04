@@ -256,24 +256,35 @@ class Store:
             update_logger.error(f"Generic Metadata Store: Error storing dataset metadata for {url}: {str(e)}")
 
     @staticmethod
-    async def _process_dataset_content(content, source_identifier: str, source_type: str) -> None:
+    async def _process_dataset_content(content, set_url: str, source_type: str, file_type: str = None) -> None:
         """
         Internal method to process downloaded dataset content.
         Handles storage to database or other processing as needed.
         
         Args:
             content: The downloaded content (dict for JSON, str for text)
-            source_identifier: URL of dataset
+            set_url: URL of dataset
             source_type: 'github' or 'generic'
+            file_type: Optional file type information for additional processing logic if needed (could be invite, url, domain, etc.)
         """
+
         try:
-            networking_logger.debug(f"Processing dataset from {source_type} source: {source_identifier}")
+            networking_logger.debug(f"Processing dataset from {source_type} source: {set_url}")
             
             # TODO: Implement actual storage logic to database
+
+            if source_type.lower() == "github":
+                pass
+
+            elif source_type.lower() == "generic":
+                pass
+
+            else:
+                raise ValueError(f"Unknown source type {source_type} for dataset content processing")
             
-            networking_logger.debug(f"Dataset content processed: {source_identifier}")
+            networking_logger.debug(f"Dataset content processed: {set_url}")
             
         except Exception as e:
-            networking_logger.error(f"Error processing dataset content from {source_identifier}: {str(e)}")
-            return {"success": False, "source_identifier": source_identifier, "source_type": source_type, "message": str(e)}
+            networking_logger.error(f"Error processing dataset content from {set_url}: {str(e)}")
+            return {"success": False, "source_identifier": set_url, "source_type": source_type, "message": str(e)}
         
