@@ -148,7 +148,7 @@ class Helpers:
                     json_content = json.loads(content)
 
                     # Process the downloaded content
-                    await Helpers._process_dataset_content(json_content, file_to_download, "github")
+                    await Store._process_dataset_content(json_content, file_to_download, "github")
                     downloaded_count += 1
                     networking_logger.info(f"GitHub Download: Successfully processed {file_to_download}")
                     
@@ -190,7 +190,7 @@ class Helpers:
             await Store.generic_metadata_store(url)  #store basic metadata for generic dataset
 
             # process the downloaded content
-            await Helpers._process_dataset_content(content, url, "generic")
+            await Store._process_dataset_content(content, url, "generic")
             
             networking_logger.info(f"Generic Download: Successfully downloaded and processed content from {url}")
             return {
