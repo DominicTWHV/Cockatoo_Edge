@@ -6,11 +6,20 @@ TAG_CONTAINER=false
 PUSH_CONTAINER=false
 CLEAN_CONTAINER=false
 HOST=""
-TAG="cockatoo_edge:latest" #set default tag in case user didnt provide one
+
+if [ -n "$CONTAINER_TAG" ]; then
+    TAG="$CONTAINER_TAG"
+elif [ -n "$TAG" ]; then
+    TAG="$TAG"
+else
+    echo "[🐋] Error: Neither 'CONTAINER_TAG' nor 'TAG' environment variables are set."
+    echo "      Please set one before running this script."
+    exit 1
+fi
 
 validate_tag() {
-    if [[ ! "$1" =~ ^[a-zA-Z0-9._/-]+:[a-zA-Z0-9._-]+$ ]] && [[ ! "$1" =~ ^[a-zA-Z0-9._/-]+$ ]]; then
-        echo "[🐋] Error: Invalid tag format '$1'. Use format: name[:tag]. Example: cockatoo_edge:latest"
+    if [[ ! "$1" =~ ^[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+$ ]] && [[ ! "$1" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+        echo "[🐋] Error: Invalid tag format '$1'. Use format: name[:tag]. Example: $TAG"
         exit 1
     fi
 }
@@ -58,7 +67,8 @@ while [[ $# -gt 0 ]]; do
             ;;
         -c|--clean)
             CLEAN_CONTAINER=true
-            docker image prune -a #docker will ask for confirmation, no need to handle it here
+            docker image prune -a 
+            shift
             ;;
         *)
             echo "[🐋] Unknown option $1"
@@ -83,7 +93,6 @@ fi
 
 if command -v docker >/dev/null 2>&1; then
     echo "[🐋] Docker is already installed"
-
 else
     echo "[🐋] Docker could not be found, installing..."
     
@@ -109,8 +118,7 @@ if [ "$BUILD_CONTAINER" = true ]; then
         exit 1
     fi
     
-    echo "[🐋] Building image..."
-    if ! TAG="$TAG" docker compose build; then
+    if ! docker build -t "$TAG" .; then
         echo "[🐋] Error: Docker build failed"
         exit 1
     fi
@@ -150,7 +158,7 @@ fi
 
 if [ "$RUN_CONTAINER" = true ]; then
     echo "[🐋] Running container..."
-    if ! TAG="$TAG" docker compose up -d; then
+    if ! docker run "$TAG"; then
         echo "[🐋] Error: Failed to run container"
         exit 1
     fi
