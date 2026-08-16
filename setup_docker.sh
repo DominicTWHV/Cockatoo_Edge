@@ -17,16 +17,9 @@ else
     exit 1
 fi
 
-validate_tag() {
-    if [[ ! "$1" =~ ^[a-zA-Z0-9._-]+:[a-zA-Z0-9._-]+$ ]] && [[ ! "$1" =~ ^[a-zA-Z0-9._-]+$ ]]; then
-        echo "[🐋] Error: Invalid tag format '$1'. Use format: name[:tag]. Example: $TAG"
-        exit 1
-    fi
-}
-
 validate_host() {
-    if [[ ! "$1" =~ ^[a-zA-Z0-9.-]+:[0-9]+$ ]]; then
-        echo "[🐋] Error: Invalid host format '$1'. Use format: hostname:port or ip:port. Example: 192.168.1.1:5000"
+    if [[ ! "$1" =~ ^[a-zA-Z0-9.-]+(:[0-9]+)?$ ]]; then
+        echo "[🐋] Error: Invalid host format '$1'. Use format: hostname[:port] or ip[:port]. Example: 192.168.1.1:5000 or registry.example.com"
         exit 1
     fi
 }
@@ -44,7 +37,6 @@ while [[ $# -gt 0 ]]; do
         -t|--tag)
             TAG_CONTAINER=true
             if [[ $2 && $2 != -* ]]; then
-                validate_tag "$2"
                 TAG="$2"
                 shift 2
             else
